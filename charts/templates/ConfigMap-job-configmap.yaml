@@ -23,5 +23,5 @@ data:
             print("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
     
     if __name__ == "__main__":
-        # list_namespaces()
+        list_namespaces()
         list_pod()
