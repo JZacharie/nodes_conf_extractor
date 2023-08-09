@@ -23,6 +23,27 @@ spec:
           containers:
             - name: {{ include "nodes_conf_extractor.fullname" . }}
               image:  "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              env:
+              - name: DB_HOST
+                valueFrom:
+                  secretKeyRef:
+                    name: db-credentials
+                    key: DB_HOST
+              - name: DB_DATABASE
+                valueFrom:
+                  secretKeyRef:
+                    name: db-credentials
+                    key: DB_DATABASE
+              - name: DB_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: db-credentials
+                    key: DB_USER
+              - name: DB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: db-credentials
+                    key: DB_PASSWORD
               command:
                 - /bin/sh
                 - '-c'
