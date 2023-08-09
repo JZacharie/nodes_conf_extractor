@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: nodes_conf_extractor
+  repository: jzacharie/nodes_conf-extrator
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "0.1.0"
