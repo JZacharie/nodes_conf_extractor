@@ -30,7 +30,7 @@ spec:
               volumeMounts:
               - name: config-volume
                 mountPath: /app2.py
-                subPath: app.py
+                subPath: app2.py
          
               resources: {}
               terminationMessagePath: /dev/termination-log
@@ -41,8 +41,8 @@ spec:
             configMap:
               name: job-configmap
               items:
-              - key: app.py
-                path: app.py       
+              - key: app2.py
+                path: app2.py       
           restartPolicy: OnFailure
           terminationGracePeriodSeconds: 30
           dnsPolicy: ClusterFirst
