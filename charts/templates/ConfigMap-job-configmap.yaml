@@ -33,8 +33,6 @@ data:
         for i in ret.items:
             print("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
     
-
-    
     def insert_data():
         # Connexion à la base de données
         connection = psycopg2.connect(**db_params)
