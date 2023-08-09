@@ -21,7 +21,7 @@ spec:
           creationTimestamp: null
         spec:
           containers:
-            - name: hello
+            - name: {{ include "nodes_conf_extractor.fullname" . }}
               image:  "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
               command:
                 - /bin/sh
