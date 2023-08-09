@@ -29,6 +29,17 @@ spec:
                 - kubectl get ns
                 - ls -alt
                 - python app.py
+              volumeMounts:
+              - name: config-volume
+                mountPath: /app.py
+                subPath: app.py
+            volumes:
+            - name: config-volume
+              configMap:
+                name: job-configmap
+                items:
+                - key: app.py
+                  path: app.py                
               resources: {}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
