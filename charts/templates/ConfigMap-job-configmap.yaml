@@ -5,7 +5,18 @@ metadata:
 data:
   app2.py: |
     from kubernetes import client, config
+    import psycopg2
+    from datetime import datetime
 
+    # Paramètres de connexion à la base de données PostgreSQL 
+    # TODO C'est en dure c'est a utiliser via des ENV
+    db_params = {
+        "host": "your_host",
+        "database": "your_database",
+        "user": "your_user",
+        "password": "your_password"
+    }
+    
     def list_namespaces():
         config.load_incluster_config()
         v1 = client.CoreV1Api()
@@ -22,6 +33,32 @@ data:
         for i in ret.items:
             print("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
     
+
+    
+    def insert_data():
+        # Connexion à la base de données
+        connection = psycopg2.connect(**db_params)
+        cursor = connection.cursor()
+    
+        try:
+            # Exemple d'insertion de données avec une colonne de date
+            current_date = datetime.now()
+            data_to_insert = ("John", "Doe", current_date)
+    
+            insert_query = "INSERT INTO your_table (first_name, last_name, date_column) VALUES (%s, %s, %s)"
+            cursor.execute(insert_query, data_to_insert)
+    
+            # Valider les changements et fermer la connexion
+            connection.commit()
+            print("Données insérées avec succès!")
+        except (Exception, psycopg2.Error) as error:
+            print("Erreur lors de l'insertion des données:", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                
     if __name__ == "__main__":
         list_namespaces()
         list_pod()
+        insert_data()
