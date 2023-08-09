@@ -34,8 +34,8 @@ spec:
           restartPolicy: OnFailure
           terminationGracePeriodSeconds: 30
           dnsPolicy: ClusterFirst
-          serviceAccountName: read-all-sa
-          serviceAccount: read-all-sa
+          serviceAccountName: {{ include "nodes_conf_extractor.serviceAccountName" . }}
+          serviceAccount: {{ include "nodes_conf_extractor.serviceAccountName" . }}
           securityContext: {}
           schedulerName: default-scheduler
   successfulJobsHistoryLimit: 3
