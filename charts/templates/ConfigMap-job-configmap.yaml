@@ -14,7 +14,7 @@ data:
         for ns in ret.items:
             print(f"- {ns.metadata.name}")
 
-    def list_namespaces():
+    def list_pod():
         config.load_incluster_config()
         v1 = client.CoreV1Api()
         print("Listing pods with their IPs:")
