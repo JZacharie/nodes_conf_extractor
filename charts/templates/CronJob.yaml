@@ -26,8 +26,7 @@ spec:
               command:
                 - /bin/sh
                 - '-c'
-                - python 
-                - /app.py
+                - python app.py
               volumeMounts:
               - name: config-volume
                 mountPath: /app.py
