@@ -5,6 +5,7 @@ metadata:
 data:
   app2.py: |
     from kubernetes import client, config
+    import os
     import psycopg2
     from datetime import datetime
 
