@@ -1,1 +1,1 @@
-kubernetes==X.X.X
+kubernetes==27.2.0
