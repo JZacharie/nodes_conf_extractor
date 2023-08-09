@@ -31,7 +31,6 @@ spec:
               - name: config-volume
                 mountPath: /app2.py
                 subPath: app2.py
-         
               resources: {}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
