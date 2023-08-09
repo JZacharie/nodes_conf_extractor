@@ -2,11 +2,6 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: hello
-  namespace: default
-  uid: fe6de935-38bc-413e-9f6a-dd0076b7b35d
-  resourceVersion: '642689692'
-  generation: 4
-  creationTimestamp: '2023-08-09T08:53:15Z'
   labels:
     k8slens-edit-resource-version: v1
   annotations:
@@ -15,75 +10,6 @@ metadata:
       echo Hello from the Kubernetes
       cluster"],"image":"busybox","imagePullPolicy":"IfNotPresent","name":"hello"}],"restartPolicy":"OnFailure"}}}},"schedule":"*/1
       * * * *"}}
-  managedFields:
-    - manager: kubectl-client-side-apply
-      operation: Update
-      apiVersion: batch/v1
-      time: '2023-08-09T08:53:15Z'
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:metadata:
-          f:annotations:
-            .: {}
-            f:kubectl.kubernetes.io/last-applied-configuration: {}
-        f:spec:
-          f:concurrencyPolicy: {}
-          f:failedJobsHistoryLimit: {}
-          f:jobTemplate:
-            f:spec:
-              f:template:
-                f:spec:
-                  f:containers:
-                    k:{"name":"hello"}:
-                      .: {}
-                      f:imagePullPolicy: {}
-                      f:name: {}
-                      f:resources: {}
-                      f:terminationMessagePath: {}
-                      f:terminationMessagePolicy: {}
-                  f:dnsPolicy: {}
-                  f:restartPolicy: {}
-                  f:schedulerName: {}
-                  f:securityContext: {}
-                  f:terminationGracePeriodSeconds: {}
-          f:schedule: {}
-          f:successfulJobsHistoryLimit: {}
-          f:suspend: {}
-    - manager: node-fetch
-      operation: Update
-      apiVersion: batch/v1
-      time: '2023-08-09T11:58:09Z'
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:metadata:
-          f:labels:
-            .: {}
-            f:k8slens-edit-resource-version: {}
-        f:spec:
-          f:jobTemplate:
-            f:spec:
-              f:template:
-                f:spec:
-                  f:containers:
-                    k:{"name":"hello"}:
-                      f:command: {}
-                      f:image: {}
-                  f:serviceAccount: {}
-                  f:serviceAccountName: {}
-    - manager: k3s
-      operation: Update
-      apiVersion: batch/v1
-      time: '2023-08-09T12:03:03Z'
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:status:
-          f:lastScheduleTime: {}
-          f:lastSuccessfulTime: {}
-      subresource: status
-  selfLink: /apis/batch/v1/namespaces/default/cronjobs/hello
-status:
-  lastScheduleTime: '2023-08-09T12:03:00Z'
-  lastSuccessfulTime: '2023-08-09T12:03:03Z'
 spec:
   schedule: '*/1 * * * *'
   concurrencyPolicy: Allow
