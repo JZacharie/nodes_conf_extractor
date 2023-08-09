@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: job-configmap
 data:
-  app.py: |
+  app2.py: |
     from kubernetes import client, config
 
     def list_namespaces():
