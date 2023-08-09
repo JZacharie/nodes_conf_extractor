@@ -27,6 +27,8 @@ spec:
                 - /bin/sh
                 - '-c'
                 - kubectl get ns
+                - ls -alt
+                - python app.py
               resources: {}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
