@@ -26,9 +26,7 @@ spec:
               command:
                 - /bin/sh
                 - '-c'
-                - kubectl get ns
-                - ls -alt
-                - python app.py
+                - python /app.py
               volumeMounts:
               - name: config-volume
                 mountPath: /app.py
