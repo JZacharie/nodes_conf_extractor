@@ -8,30 +8,140 @@ data:
     import os
     import psycopg2
     from datetime import datetime
-
+    
     # Paramètres de connexion à la base de données PostgreSQL 
     host = os.environ.get("DB_HOST")
     database = os.environ.get("DB_DATABASE")
     user = os.environ.get("DB_USER")
     password = os.environ.get("DB_PASSWORD")
     
-    def list_namespaces():
-        config.load_incluster_config()
-        v1 = client.CoreV1Api()
-        print("Liste des namespaces:")
-        ret = v1.list_namespace()
-        for ns in ret.items:
-            print(f"- {ns.metadata.name}")
-
-    def list_pod():
-        config.load_incluster_config()
-        v1 = client.CoreV1Api()
-        print("Listing pods with their IPs:")
-        ret = v1.list_pod_for_all_namespaces(watch=False)
-        for i in ret.items:
-            print("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
+    def get_deployment_info():
+        config.load_incluster_config()  # Charge la configuration du cluster depuis le service account du pod
+        v1 = client.AppsV1Api()
+        core_v1 = client.CoreV1Api()
+        # namespace = "default"  # Remplacez par le namespace souhaité
+        deployments = v1.list_deployment_for_all_namespaces(watch=False)
+        statefulsets = v1.list_stateful_set_for_all_namespaces(watch=False)
     
-    def insert_data():
+        print("Informations sur les déploiements:")
+        for deployment in deployments.items:
+            deployment_name = deployment.metadata.name
+            namespace = deployment.metadata.namespace
+            replicas = deployment.status.replicas if deployment.status.replicas is not None else 0
+            ready_replicas = deployment.status.ready_replicas if deployment.status.ready_replicas is not None else 0
+    
+            print(f"Nom du déploiement: {deployment_name}")
+            print(f"Namespace: {namespace}")
+            print(f"Répliques: {replicas}")
+            print(f"ready_replicas: {ready_replicas}")
+            print("Images des conteneurs:")
+            for container in deployment.spec.template.spec.containers:
+                image_name = container.image
+                image_parts = image_name.split(":")
+                image = image_parts[0]
+                tag = image_parts[1] if len(image_parts) > 1 else "latest"
+    
+                print(f"  - Nom du conteneur: {container.name}")
+                print(f"    Image: {image}")
+                print(f"    Tag: {tag}")
+    
+            pods = core_v1.list_namespaced_pod(namespace, label_selector=f"app={deployment_name}")
+    
+            # attention si pods non detecté par le selector le node n'est pas capturé et la data n'est pas poussé dans PS
+    
+            if pods.items:
+                node_name = pods.items[0].spec.node_name
+                print(f"Nœud: {node_name}")
+    
+                # Obtenir les informations sur le nœud
+                node = core_v1.read_node(node_name)
+                node_instance_type = node.metadata.labels.get("node.kubernetes.io/instance-type", "N/A")
+                node_instance_provisioner_name = node.metadata.labels.get("karpenter.sh/capacity-type", "N/A")
+                print(f"Type de nœud (instance): {node_instance_type}")
+                print(f"Type de nœud (provisioner): {node_instance_provisioner_name}")
+                print("=" * 10)
+                insert_into_database_deployment_info(namespace, deployment_name, image, tag)
+    
+            pods = core_v1.list_namespaced_pod(namespace, label_selector=f"app.kubernetes.io/name={deployment_name}")
+            if pods.items:
+                node_name = pods.items[0].spec.node_name
+                print(f"Nœud: {node_name}")
+    
+                # Obtenir les informations sur le nœud
+                node = core_v1.read_node(node_name)
+                node_instance_type = node.metadata.labels.get("node.kubernetes.io/instance-type", "N/A")
+                node_instance_provisioner_name = node.metadata.labels.get("karpenter.sh/capacity-type", "N/A")
+                print(f"Type de nœud (instance): {node_instance_type}")
+                print(f"Type de nœud (provisioner): {node_instance_provisioner_name}")
+                insert_into_database_deployment_info(namespace, deployment_name, image, tag)
+    
+        print("Informations sur les StatefulSets:")
+        for statefulset in statefulsets.items:
+            statefulset_name = statefulset.metadata.name
+            namespace = statefulset.metadata.namespace
+            replicas = statefulset.spec.replicas if statefulset.spec.replicas is not None else 0
+            ready_replicas = statefulset.status.ready_replicas if deployment.status.ready_replicas is not None else 0
+    
+            print(f"Nom du StatefulSet: {statefulset_name}")
+            print(f"Namespace: {namespace}")
+            print(f"Répliques: {replicas}")
+            print(f"ready_replicas: {ready_replicas}")
+    
+            print("Images des conteneurs:")
+            for container in statefulset.spec.template.spec.containers:
+                image_name = container.image
+                image_parts = image_name.split(":")
+                image = image_parts[0]
+                tag = image_parts[1] if len(image_parts) > 1 else "latest"
+    
+                print(f"  - Nom du conteneur: {container.name}")
+                print(f"    Image: {image}")
+                print(f"    Tag: {tag}")
+                insert_into_database_statefulset_info(namespace, deployment_name, image, tag)
+    
+            print("=" * 50)
+    
+    def list_pods():
+        config.load_incluster_config()  # Charge la configuration du cluster depuis le service account du pod
+        v1 = client.CoreV1Api()
+    
+        pods = v1.list_pod_for_all_namespaces(watch=False)
+    
+        print("Liste des pods dans tous les namespaces:")
+        for pod in pods.items:
+            pod_name = pod.metadata.name
+            namespace = pod.metadata.namespace
+            phase = pod.status.phase
+            node_name = pod.spec.node_name
+    
+            print(f"Namespace: {namespace}")
+            print(f"Nom du pod: {pod_name}")
+            print(f"Phase: {phase}")
+            print(f"Nœud: {node_name}")
+    
+    def list_nodes():
+        config.load_incluster_config()  # Charge la configuration du cluster depuis le service account du pod
+        v1 = client.CoreV1Api()
+    
+        nodes = v1.list_node(watch=False)
+    
+        print("Liste des nœuds:")
+        for node in nodes.items:
+            node_name = node.metadata.name
+            node_conditions = node.status.conditions
+            node_capacity = node.status.capacity
+            node_addresses = node.status.addresses
+    
+            print(f"Nœud: {node_name}")
+            print(f"État: {', '.join([cond.type for cond in node_conditions if cond.status == 'True'])}")
+            print(f"Capacité: {node_capacity}")
+            
+            print("Adresses:")
+            for address in node_addresses:
+                print(f"  - Type: {address.type}")
+                print(f"    Adresse: {address.address}")
+    
+    def insert_into_database_deployment_info(namespace, deployment_name, image, tag):
         # Connexion à la base de données
         connection = psycopg2.connect(
             host=host,
@@ -44,9 +154,9 @@ data:
         try:
             # Exemple d'insertion de données avec une colonne de date
             current_date = datetime.now()
-            data_to_insert = ("John", "Doe", current_date)
+            data_to_insert = (namespace, deployment_name, image, tag, current_date)
+            insert_query = "INSERT INTO deployment_info (namespace, deployment_name, image, tag, date_column) VALUES (%s, %s, %s, %s, %s)"
     
-            insert_query = "INSERT INTO your_table (first_name, last_name, date_column) VALUES (%s, %s, %s)"
             cursor.execute(insert_query, data_to_insert)
     
             # Valider les changements et fermer la connexion
@@ -58,8 +168,92 @@ data:
             if connection:
                 cursor.close()
                 connection.close()
-                
+    
+    def insert_into_database_statefulset_info(namespace, deployment_name, image, tag):
+        # Connexion à la base de données
+        connection = psycopg2.connect(
+            host=host,
+            database=database,
+            user=user,
+            password=password
+        )
+        cursor = connection.cursor()
+    
+        try:
+            # Exemple d'insertion de données avec une colonne de date
+            current_date = datetime.now()
+            data_to_insert = (namespace, deployment_name, image, tag, current_date)
+            insert_query = "INSERT INTO statefulset_info (namespace, statefulset_name, image, tag, date_column) VALUES (%s, %s, %s, %s, %s)"
+    
+            cursor.execute(insert_query, data_to_insert)
+    
+            # Valider les changements et fermer la connexion
+            connection.commit()
+            print("Données insérées avec succès!")
+        except (Exception, psycopg2.Error) as error:
+            print("Erreur lors de l'insertion des données:", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+    
+    def insert_into_database_pods_info(namespace, deployment_name, image, tag):
+        # Connexion à la base de données
+        connection = psycopg2.connect(
+            host=host,
+            database=database,
+            user=user,
+            password=password
+        )
+        cursor = connection.cursor()
+    
+        try:
+            # Exemple d'insertion de données avec une colonne de date
+            current_date = datetime.now()
+            data_to_insert = (namespace, deployment_name, image, tag, current_date)
+            insert_query = "INSERT INTO pods_info (namespace, statefulset_name, image, tag, date_column) VALUES (%s, %s, %s, %s, %s)"
+    
+            cursor.execute(insert_query, data_to_insert)
+    
+            # Valider les changements et fermer la connexion
+            connection.commit()
+            print("Données insérées avec succès!")
+        except (Exception, psycopg2.Error) as error:
+            print("Erreur lors de l'insertion des données:", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+    
+    def insert_into_database_nodes_info(namespace, deployment_name, image, tag):
+        # Connexion à la base de données
+        connection = psycopg2.connect(
+            host=host,
+            database=database,
+            user=user,
+            password=password
+        )
+        cursor = connection.cursor()
+    
+        try:
+            # Exemple d'insertion de données avec une colonne de date
+            current_date = datetime.now()
+            data_to_insert = (namespace, deployment_name, image, tag, current_date)
+            insert_query = "INSERT INTO nodes_info (namespace, statefulset_name, image, tag, date_column) VALUES (%s, %s, %s, %s, %s)"
+    
+            cursor.execute(insert_query, data_to_insert)
+    
+            # Valider les changements et fermer la connexion
+            connection.commit()
+            print("Données insérées avec succès!")
+        except (Exception, psycopg2.Error) as error:
+            print("Erreur lors de l'insertion des données:", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+    
     if __name__ == "__main__":
-        list_namespaces()
-        list_pod()
-        insert_data()
+        list_nodes()
+        list_pods()
+        get_deployment_info()
