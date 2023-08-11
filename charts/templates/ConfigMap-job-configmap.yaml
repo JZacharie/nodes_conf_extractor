@@ -256,5 +256,5 @@ data:
     
     if __name__ == "__main__":
         list_nodes()
-        list_pods()
-        get_deployment_info()
+        #list_pods()
+        #get_deployment_info()
