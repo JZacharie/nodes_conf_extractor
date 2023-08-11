@@ -143,8 +143,8 @@ data:
                 node=node_name
                 ip=address.address
                 type="N/A"
-                memory_size=node.status.capacity.memory
-                nb_cpu=node.status.capacity.cpu
+                memory_size="N/A"
+                nb_cpu="N/A"
                 insert_into_database_nodes_info(node, ip, type,  memory_size, nb_cpu)
                 
     def insert_into_database_deployment_info(namespace, deployment_name, image, tag):
