@@ -212,7 +212,7 @@ data:
             # Exemple d'insertion de données avec une colonne de date
             current_date = datetime.now()
             data_to_insert = (namespace, deployment_name, image, tag, current_date)
-            insert_query = "INSERT INTO pods_info (namespace, statefulset_name, image, tag, date_column) VALUES (%s, %s, %s, %s, %s)"
+            insert_query = "INSERT INTO pods_info (namespace, pod_name, image, tag, date_column) VALUES (%s, %s, %s, %s, %s)"
     
             cursor.execute(insert_query, data_to_insert)
     
