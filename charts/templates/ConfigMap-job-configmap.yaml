@@ -198,7 +198,7 @@ data:
                 cursor.close()
                 connection.close()
     
-    def insert_into_database_pods_info(namespace, deployment_name, image, tag):
+    def insert_into_database_pods_info(namespace, deployment_name, image, tag, container):
         # Connexion à la base de données
         connection = psycopg2.connect(
             host=host,
@@ -211,8 +211,8 @@ data:
         try:
             # Exemple d'insertion de données avec une colonne de date
             current_date = datetime.now()
-            data_to_insert = (namespace, deployment_name, image, tag, current_date)
-            insert_query = "INSERT INTO pods_info (namespace, pod_name, image, tag, date_column) VALUES (%s, %s, %s, %s, %s)"
+            data_to_insert = (namespace, deployment_name, image, tag, current_date, container)
+            insert_query = "INSERT INTO pods_info (namespace, pod_name, image, tag, date_column, container) VALUES (%s, %s, %s, %s, %s, %s)"
     
             cursor.execute(insert_query, data_to_insert)
     
