@@ -140,7 +140,12 @@ data:
             for address in node_addresses:
                 print(f"  - Type: {address.type}")
                 print(f"    Adresse: {address.address}")
-                insert_into_database_nodes_info(node_name, address.address, node_capacity, node_capacity)
+                node=node_name
+                ip=address.address
+                type="N/A"
+                memory_size=node.status.capacity.memory
+                nb_cpu=node.status.capacity.cpu
+                insert_into_database_nodes_info(node, ip, type,  memory_size, nb_cpu)
                 
     def insert_into_database_deployment_info(namespace, deployment_name, image, tag):
         # Connexion à la base de données
@@ -226,7 +231,7 @@ data:
                 cursor.close()
                 connection.close()
     
-    def insert_into_database_nodes_info(node, ip, type, size):
+    def insert_into_database_nodes_info(node, ip, type, memory_size, nb_cpu):
         # Connexion à la base de données
         connection = psycopg2.connect(
             host=host,
@@ -239,8 +244,8 @@ data:
         try:
             # Exemple d'insertion de données avec une colonne de date
             current_date = datetime.now()
-            data_to_insert = (node, ip, type, size, current_date)
-            insert_query = "INSERT INTO nodes_info (node, ip, type, size, date_column) VALUES (%s, %s, %s, %s, %s)"
+            data_to_insert = (node, ip, type,  memory_size, nb_cpu, current_date)
+            insert_query = "INSERT INTO nodes_info (node, ip, type,  memory_size, nb_cpu, date_column) VALUES (%s, %s, %s, %s, %s, %s)"
     
             cursor.execute(insert_query, data_to_insert)
     
