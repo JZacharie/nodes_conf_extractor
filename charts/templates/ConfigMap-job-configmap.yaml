@@ -135,7 +135,8 @@ data:
             print(f"Nœud: {node_name}")
             print(f"État: {', '.join([cond.type for cond in node_conditions if cond.status == 'True'])}")
             print(f"Capacité: {node_capacity}")
-            
+            memory_size = node.metadata.labels.get("karpenter.k8s.aws/instance-memory", "N/A")
+            type =  node.metadata.labels.get("karpenter.sh/capacity-type", "N/A")
             print("Adresses:")
             for address in node_addresses:
                 print(f"  - Type: {address.type}")
