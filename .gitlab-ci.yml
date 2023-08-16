@@ -1,0 +1,28 @@
+stages:
+  - build
+  - package
+
+variables:
+  HELM_CHART_NAME: "nodes_conf_extractor"
+  NEXUS_REPO_URL: "https://your-nexus-repo/repository/helm"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - dist/
+    
+build_helm_chart:
+  stage: build
+  image: dtzar/helm-kubectl:3.12.3 # Utilisez une image Docker avec Helm préinstallé
+  script:
+    - cd 
+    - helm package # Mettez ici les commandes pour construire votre chart Helm (e.g., helm lint, helm package, etc.)
+    - # Assurez-vous que le chart est dans le répertoire de build, par exemple "dist/"
+
+package_and_push_to_nexus:
+  stage: package
+  image: curlimages/curl:latest # Utilisez une image Docker avec curl préinstallé
+  script:
+    - curl -v -u YOUR_NEXUS_CREDENTIALS --upload-file dist/${HELM_CHART_NAME}.tgz "${NEXUS_REPO_URL}/${HELM_CHART_NAME}/${CI_COMMIT_REF_NAME}/${CI_PIPELINE_ID}/${HELM_CHART_NAME}-${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}.tgz"
+  only:
+    - tags
